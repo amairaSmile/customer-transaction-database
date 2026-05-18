@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "customer-transaction-database"
 version = "1.0.0"
-description = " CRM and transaction data into a golden customer record."
+description = "CRM and transaction data into a golden customer record"
 requires-python = ">=3.10"
 dependencies = [
     "pyspark==3.5.1",
