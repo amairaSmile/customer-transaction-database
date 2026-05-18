@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "customer-transaction-database"
+version = "1.0.0"
+description = " CRM and transaction data into a golden customer record."
+requires-python = ">=3.10"
+dependencies = [
+    "pyspark==3.5.1",
+]
+
+[project.optional-dependencies]
+test = ["pytest==8.2.0"]
+
+[project.scripts]
+golden-record = "src.pipeline:main"
+
+[tool.setuptools]
+packages = ["src"]
