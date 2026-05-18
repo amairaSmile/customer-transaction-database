@@ -6,6 +6,11 @@ from . import config
 def create_spark_session(app_name: str):
     spark = SparkSession.builder.appName(app_name).getOrCreate()
     return spark
+def read_csv(spark,path: str,schema: str):
+    df = spark.read.option("header", True)\
+        .schema(schema)\
+        .csv(str(path))
+    return df
 
 def clean_phone(col: Column)-> Column:
     digits = F.regexp_replace(col,r"\D","")
