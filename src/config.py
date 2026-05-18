@@ -6,6 +6,7 @@ DATA_DIR = PROJECT_ROOT/"data"
 IDENTY_FIELD = ["email","phone"]
 CRM_IDENTY_FIELD = ["first_name","last_name","registration_date"]
 ADDRESS_FIELD= ["address","city","country"]
+DATE_FORMAT= ['yyyy-MM-dd','yyyyMMdd']
 # define the schema for the csv
 
 CRM_SCHEMA = StructType(
