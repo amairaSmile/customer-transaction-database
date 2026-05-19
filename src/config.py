@@ -1,7 +1,7 @@
 from pathlib import Path
 from pyspark.sql.types import StringType, StructField, StructType
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT/"data"
 IDENTY_FIELD = ["email","phone"]
 CRM_IDENTY_FIELD = ["first_name","last_name","registration_date"]
