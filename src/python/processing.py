@@ -127,6 +127,12 @@ def reconcile(df: DataFrame)-> DataFrame:
         pick_recent("phone"),
     ).dropDuplicates(["person_id"])
 
+def write_golden(df: DataFrame) -> None:
+    config.OUTPUT_DIR.mkdir(parents=True,exist_ok=True)
+    path = str(config.OUTPUT_DIR /"golden_customers.csv")
+    df.coalesce(1).write.option("header", True).mode("overwrite").csv(path)
+    print(f"Golden record written: {path}")
+
 def run() -> None:
     """build the golden record and write it out"""
     try:
@@ -140,7 +146,7 @@ def run() -> None:
         #print("input rows:", combined_df.count())
         #print("output rows:", final_df.count())
         golden_df = reconcile(final_df)
-        golden_df.show(3)
+        write_golden(golden_df)
     except Exception as e:
         print(f"Pipeline failed: {e}")
         raise
