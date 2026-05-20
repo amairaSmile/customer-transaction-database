@@ -4,7 +4,7 @@ which records are the same person, reconcile each person to one row, and
 write the golden record
 """
 
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame,Window
 from pyspark.sql import functions as F
 import config
 import utils
@@ -86,6 +86,47 @@ def clean_transactions(df: DataFrame) -> DataFrame:
             "full_name"
         ),
     )
+
+# Identify assign one person_id across both systems
+
+def generate_identity(df: DataFrame) -> DataFrame:
+    df = df.dropDuplicates() # there are multiple exact row in CRM file
+    """ 
+    Primary key: email 
+    if email not present then form a key using phone_num and name ,at last if no phn number ,fill in with person_id
+    """
+    df = df.withColumn("identity_key",F.when(F.col("email").isNotNull(),F.concat(F.lit("e:"),F.col("email")))
+                       .when(F.col("phone_match_key").isNotNull() & F.col("full_name").isNotNull(),F.concat(F.lit("pn:"), F.col("phone_match_key"),
+                        F.lit("|"), F.lower(F.col("full_name")))).otherwise(F.concat(F.lit("s:"), F.col("source"), F.col("source_id")))
+                       )
+
+    return df.withColumnRenamed("identity_key","person_id")
+
+def reconcile(df: DataFrame)-> DataFrame:
+    crm_first = Window.partitionBy("person_id").orderBy(
+        F.when(F.col("source") == "crm", 0).otherwise(1),
+        F.col("record_updated_at").desc_nulls_last(),
+    )
+    # most recent handles people who moved,contact details updated
+    most_recent = Window.partitionBy("person_id").orderBy(
+        F.col("record_updated_at").desc_nulls_last()
+    )
+    pick_crm = lambda field: F.first(F.col(field), ignorenulls=True).over(crm_first).alias(field)
+    pick_recent = lambda field: F.first(F.col(field), ignorenulls=True).over(most_recent).alias(field)
+
+    return df.select(
+        "person_id",
+        pick_crm("first_name"),
+        pick_crm("last_name"),
+        pick_crm("full_name"),
+        pick_crm("registration_date"),
+        pick_recent("address"),
+        pick_recent("city"),
+        pick_recent("country"),
+        pick_recent("email"),
+        pick_recent("phone"),
+    ).dropDuplicates(["person_id"])
+
 def run() -> None:
     """build the golden record and write it out"""
     spark = utils.create_spark_session("CRM_SYSTEM")
@@ -93,8 +134,15 @@ def run() -> None:
     trans_df = utils.read_csv(spark,config.DATA_DIR/"transaction_customers.csv",config.TRANSACTION_SCHEMA)
     crm_cleaned_df = clean_crm(crm_df)
     trans_cleaned_df = clean_transactions(trans_df)
-    crm_cleaned_df.show(20)
-    trans_cleaned_df.show(20)
+    combined_df = crm_cleaned_df.unionByName(trans_cleaned_df)
+    final_df= generate_identity(combined_df)
+    #print("input rows:", combined_df.count())
+    #print("output rows:", final_df.count())
+    golden_df = reconcile(final_df)
+    golden_df.show(3)
+
+
+
 
 
 if __name__ == "__main__":
