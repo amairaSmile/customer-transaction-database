@@ -129,18 +129,23 @@ def reconcile(df: DataFrame)-> DataFrame:
 
 def run() -> None:
     """build the golden record and write it out"""
-    spark = utils.create_spark_session("CRM_SYSTEM")
-    crm_df = utils.read_csv(spark,config.DATA_DIR/"crm_customers.csv",config.CRM_SCHEMA)
-    trans_df = utils.read_csv(spark,config.DATA_DIR/"transaction_customers.csv",config.TRANSACTION_SCHEMA)
-    crm_cleaned_df = clean_crm(crm_df)
-    trans_cleaned_df = clean_transactions(trans_df)
-    combined_df = crm_cleaned_df.unionByName(trans_cleaned_df)
-    final_df= generate_identity(combined_df)
-    #print("input rows:", combined_df.count())
-    #print("output rows:", final_df.count())
-    golden_df = reconcile(final_df)
-    golden_df.show(3)
-
+    try:
+        spark = utils.create_spark_session("CRM_SYSTEM")
+        crm_df = utils.read_csv(spark,config.DATA_DIR/"crm_customers.csv",config.CRM_SCHEMA)
+        trans_df = utils.read_csv(spark,config.DATA_DIR/"transaction_customers.csv",config.TRANSACTION_SCHEMA)
+        crm_cleaned_df = clean_crm(crm_df)
+        trans_cleaned_df = clean_transactions(trans_df)
+        combined_df = crm_cleaned_df.unionByName(trans_cleaned_df)
+        final_df= generate_identity(combined_df)
+        #print("input rows:", combined_df.count())
+        #print("output rows:", final_df.count())
+        golden_df = reconcile(final_df)
+        golden_df.show(3)
+    except Exception as e:
+        print(f"Pipeline failed: {e}")
+        raise
+    finally:
+        spark.stop()
 
 
 

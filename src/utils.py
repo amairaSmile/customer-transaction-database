@@ -8,10 +8,13 @@ def create_spark_session(app_name: str):
     return spark
 # read files
 def read_csv(spark,path: str,schema: str):
-    df = spark.read.option("header", True)\
-        .schema(schema)\
-        .csv(str(path))
-    return df
+    try:
+        df = spark.read.option("header", True)\
+            .schema(schema)\
+            .csv(str(path))
+        return df
+    except Exception as e:
+        raise RuntimeError(f"Failed to read CSV at {path}")
 
 def clean_phone(col: Column)-> Column:
     digits = F.regexp_replace(col,r"\D","")
