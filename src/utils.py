@@ -31,3 +31,12 @@ def clean_name(col: Column) -> Column:
 def blank_to_null(col: Column) -> Column:
     trimmed = F.trim(col)
     return F.when(trimmed == "",None).otherwise(trimmed)
+
+def clean_email(col: Column) -> Column:
+    return blank_to_null(F.trim(col))
+
+def phone_match_key(col: Column) -> Column:
+    # match on digits because CRM has +33/+44 and txn doesn't
+    digits = F.regexp_replace(col,r"\D","")
+    n = config.PHONE_NUM_LEN
+    return F.when(F.length(digits) >= n, F.substring(digits,-n,n)).otherwise(None)

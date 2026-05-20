@@ -7,6 +7,7 @@ IDENTY_FIELD = ["email","phone"]
 CRM_IDENTY_FIELD = ["first_name","last_name","registration_date"]
 ADDRESS_FIELD= ["address","city","country"]
 DATE_FORMAT= ['yyyy-MM-dd','yyyyMMdd']
+PHONE_NUM_LEN= 9
 # define the schema for the csv
 
 CRM_SCHEMA = StructType(
