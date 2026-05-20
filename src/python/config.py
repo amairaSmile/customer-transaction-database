@@ -3,6 +3,7 @@ from pyspark.sql.types import StringType, StructField, StructType
 
 PROJECT_ROOT = Path(__file__).parent.parent
 DATA_DIR = PROJECT_ROOT/"data"
+OUTPUT_DIR = PROJECT_ROOT/"output"
 IDENTY_FIELD = ["email","phone"]
 CRM_IDENTY_FIELD = ["first_name","last_name","registration_date"]
 ADDRESS_FIELD= ["address","city","country"]

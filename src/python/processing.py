@@ -131,8 +131,8 @@ def run() -> None:
     """build the golden record and write it out"""
     try:
         spark = utils.create_spark_session("CRM_SYSTEM")
-        crm_df = utils.read_csv(spark,config.DATA_DIR/"crm_customers.csv",config.CRM_SCHEMA)
-        trans_df = utils.read_csv(spark,config.DATA_DIR/"transaction_customers.csv",config.TRANSACTION_SCHEMA)
+        crm_df = utils.read_csv(spark, config.DATA_DIR / "crm_customers.csv", config.CRM_SCHEMA)
+        trans_df = utils.read_csv(spark, config.DATA_DIR / "transaction_customers.csv", config.TRANSACTION_SCHEMA)
         crm_cleaned_df = clean_crm(crm_df)
         trans_cleaned_df = clean_transactions(trans_df)
         combined_df = crm_cleaned_df.unionByName(trans_cleaned_df)

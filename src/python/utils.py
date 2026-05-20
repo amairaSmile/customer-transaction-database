@@ -2,6 +2,7 @@ from pyspark.sql import Column, SparkSession
 from pyspark.sql import functions as F
 import config
 
+
 # create spark session
 def create_spark_session(app_name: str):
     spark = SparkSession.builder.appName(app_name).getOrCreate()
